@@ -10,3 +10,14 @@ logEvent := LogEvent{
 }
 log.Printf("Event: %s", logEvent.Message)
 // Log the event to a file or other storage
+
+func writeLogToFile(logEvent LogEvent, logFile *os.File) error {
+    // Format the log event as a JSON string
+    logEntry, err := json.Marshal(logEvent)
+    if err != nil {
+        return err
+    }
+
+    _, err = logFile.WriteString(string(logEntry) + "\n")
+    return err
+}
