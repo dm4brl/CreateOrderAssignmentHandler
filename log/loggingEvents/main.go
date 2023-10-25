@@ -36,3 +36,38 @@ func analyzeLogs(logFile *os.File) ([]LogEvent, error) {
 
     return logEvents, scanner.Err()
 }
+logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+if err != nil {
+    log.Fatalf("Failed to open log file: %v", err)
+}
+defer logFile.Close()
+
+nonStandardEvent := detectNonStandardEvent()
+
+if nonStandardEvent {
+    logEvent := LogEvent{
+        Time:    time.Now(),
+        Message: "Non-standard event detected",
+        Analysis: "This event does not conform to the expected pattern. Additional analysis may be needed.",
+    }
+
+    log.Printf("Event: %s", logEvent.Message)
+
+    err := writeLogToFile(logEvent, logFile)
+    if err != nil {
+        log.Printf("Failed to write log event to file: %v", err)
+    }
+}
+
+// ...
+
+// Later, you can analyze the logs and get analysis comments
+logEvents, err := analyzeLogs(logFile)
+if err != nil {
+    log.Printf("Error analyzing logs: %v", err)
+}
+
+for _, event := range logEvents {
+    log.Printf("Event: %s", event.Message)
+    log.Printf("Analysis: %s", event.Analysis)
+}
