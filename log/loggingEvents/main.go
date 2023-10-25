@@ -1,3 +1,24 @@
+import (
+    "database/sql"
+    "encoding/json"
+    "log"
+    "time"
+
+    "github.com/confluent-kafka-go/kafka"
+)
+
+// Initialize the Kafka producer
+producer, err := kafka.NewProducer(&kafka.ConfigMap{
+    "bootstrap.servers": "localhost:9092", // Your Kafka broker address
+})
+
+if err != nil {
+    log.Fatalf("Failed to create Kafka producer: %s\n", err)
+}
+
+defer producer.Close()
+
+
 type LogEvent struct {
     Time     time.Time
     Message  string
