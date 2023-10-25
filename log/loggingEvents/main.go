@@ -92,3 +92,33 @@ for _, event := range logEvents {
     log.Printf("Event: %s", event.Message)
     log.Printf("Analysis: %s", event.Analysis)
 }
+nonStandardEvent := detectNonStandardEvent()
+if nonStandardEvent {
+    logEvent := LogEvent{
+        Time:    time.Now(),
+        Message: "Non-standard event detected",
+        Analysis: "This event does not conform to the expected pattern. Additional analysis may be needed.",
+    }
+
+    log.Printf("Event: %s", logEvent.Message)
+
+    // Fetch relevant data from the database
+    data, err := fetchDataFromDB(db)
+    if err != nil {
+        log.Printf("Error fetching data from the database: %v", err)
+    } else {
+        logEvent.Analysis += " Data from the database: " + data
+    }
+
+    // Send the log event to Kafka
+    logEventJSON, _ := json.Marshal(logEvent)
+    kafkaMessage := &kafka.Message{
+        TopicPartition: kafka.TopicPartition{Topic: &kafkaTopic, Partition: kafka.PartitionAny},
+        Value:          logEventJSON,
+    }
+
+    err := producer.Produce(kafkaMessage, nil)
+    if err != nil {
+        log.Printf("Failed to produce message to Kafka: %v\n", err)
+    }
+}
